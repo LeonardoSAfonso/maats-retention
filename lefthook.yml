@@ -1,0 +1,17 @@
+# Hooks compartilhados pelo monorepo. Rode `pnpm exec lefthook install` uma vez por clone.
+#
+# O lint NÃO roda no pre-commit: cada pacote tem o seu `eslint.config.mjs` (flat
+# config), e rodar o ESLint da raiz sobre arquivos de pacotes diferentes resolve o
+# config errado. O `pre-push` cobre isso com o pipeline completo.
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,md,yaml,yml,css}"
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    verify:
+      run: pnpm verify

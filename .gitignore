@@ -1,0 +1,49 @@
+# Dependências
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Testes e cobertura
+coverage/
+
+# Ambiente (cada app tem o seu .env; o da raiz é do docker compose)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Ferramentas locais de agente (hooks, skills e lock do seu gerenciador).
+# Ficam fora do pacote: são da máquina de quem desenvolve, não do teste.
+.claude/
+.cursor/
+.opencode/
+.agents/
+skills-lock.json
+
+# Vercel
+.vercel
+
+# Gerados
+*.pdf

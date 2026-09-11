@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "NestJS (ESM)",
+  // Os `paths` ficam no tsconfig de cada pacote: caminhos relativos em `paths`
+  // resolvem a partir do arquivo que os declara, então movê-los para cá
+  // quebraria os aliases silenciosamente.
+  "extends": "./base.json",
+  "compilerOptions": {
+    // `bundler` permite escrever `@/app.module` sem extensão. O build do Nest
+    // roda `tsc-alias` depois do `tsc`, reescrevendo os aliases e adicionando o
+    // `.js` que o ESM do Node exige em tempo de execução.
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2023",
+    "lib": ["es2023"],
+    "types": ["node"],
+
+    // Emit
+    // `outDir` fica no tsconfig de cada pacote: caminhos relativos em um config
+    // estendido resolvem a partir do arquivo que os declara, não do pacote.
+    "declaration": true,
+    "removeComments": true,
+    "sourceMap": true,
+
+    // Decorators (NestJS)
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // O Nest instancia propriedades via DI, não no construtor.
+    "strictPropertyInitialization": false
+  }
+}

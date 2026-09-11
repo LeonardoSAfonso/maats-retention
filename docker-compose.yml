@@ -1,0 +1,31 @@
+# Serviços de infraestrutura do teste (Postgres).
+#
+# Suba apenas o banco com `docker compose up -d db` (ou `pnpm db:up` na raiz).
+# Ao entregar, este arquivo deve conter também os serviços da API e do frontend
+# (`docker compose up` tem de subir o fluxo completo - ver TESTE.md).
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: smart-retention-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-smart_retention}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-smart_retention}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:

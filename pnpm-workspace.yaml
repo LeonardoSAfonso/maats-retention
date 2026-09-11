@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+
+# pnpm 10+ não roda scripts de instalação por padrão. Estas dependências
+# precisam do postinstall para funcionar (binários nativos, git hooks).
+allowBuilds:
+  lefthook: true
+  sharp: true
+  unrs-resolver: true
+
+# @nestjs/platform-express traz um multer com advisories abertos. O override
+# mantém `npm audit` limpo para quem for avaliar.
+overrides:
+  multer: ^2.3.0

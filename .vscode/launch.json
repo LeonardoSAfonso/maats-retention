@@ -1,0 +1,40 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Nest: Start Debug",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@repo/backend", "run", "start:debug"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Nest: Start Prod (dist)",
+      "preLaunchTask": "pnpm: build",
+      "program": "${workspaceFolder}/apps/backend/dist/main.js",
+      "cwd": "${workspaceFolder}/apps/backend",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "outFiles": ["${workspaceFolder}/apps/backend/dist/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Nest: Attach (9229)",
+      "port": 9229,
+      "restart": true,
+      "autoAttachChildProcesses": true
+    }
+  ]
+}

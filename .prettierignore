@@ -1,0 +1,12 @@
+node_modules
+dist
+.next
+out
+.turbo
+coverage
+*.tsbuildinfo
+pnpm-lock.yaml
+apps/frontend/src/app/favicon.ico
+
+# Gerado pelo `next dev` a cada start; formatar aqui s\u00f3 cria diff fantasma.
+apps/frontend/AGENTS.md
