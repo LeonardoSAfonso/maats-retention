@@ -2,7 +2,7 @@
 
 Cenário: **Cancelamento com Retenção Inteligente**. PoC fullstack de auto-atendimento de cancelamento de assinatura com uma camada de IA que reduz o custo de retenção humana.
 
-> **Candidato:** comece por [`TESTE.md`](./TESTE.md). Ele tem escopo, regras, prazos e critérios de aceite.
+> **Candidato:** [`TESTE.md`](./TESTE.md) reúne escopo, regras, prazos e critérios de aceite.
 > **Avaliador:** [`RUBRICA.md`](./RUBRICA.md) tem os eixos e pesos; [`AVALIACAO.md`](./AVALIACAO.md) é a ficha para preencher por candidato.
 
 ## A PoC
@@ -106,8 +106,8 @@ Detalhes de cada pacote: [`packages/contracts/README.md`](./packages/contracts/R
 
 ## Uso de IA
 
-Permitido, desde que você entenda e defenda o que entregou, e declare no README como usou (ou que não usou). Sem penalidade em nenhum dos casos. Leia a seção **Uso de IA** em [`TESTE.md`](./TESTE.md#uso-de-ia) para o que reprova.
+Você pode usar IA para fazer o teste. Revise o resultado, entenda as decisões e esteja pronto para explicar o código na conversa final. Registre no README como usou a ferramenta ou diga que não usou. Nenhuma das duas escolhas reduz a nota; o que reprova está na seção **Uso de IA** de [`TESTE.md`](./TESTE.md#uso-de-ia).
 
 ## Arquivo congelado
 
-`packages/contracts/` é a especificação. Não edite (um teste dentro do próprio pacote falha se os limiares ou os cenários mudarem). Se achar que a spec está errada, escreva no seu README: apontar o problema com argumento conta a favor.
+`packages/contracts/` é a especificação e deve ficar intacto. Um teste do próprio pacote falha se os limiares ou os cenários mudarem. Se encontrar um problema na spec, registre-o no README e explique o motivo.

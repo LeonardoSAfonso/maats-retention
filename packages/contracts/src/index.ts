@@ -1,4 +1,3 @@
-// Ponto de entrada do pacote. Tudo que os apps consomem sai daqui:
-//   import { scenarios, LOW_RISK_THRESHOLD, type ScoringAgent } from "@repo/contracts";
+// Os apps importam contratos e cenários por `@repo/contracts`.
 export * from "./scenarios.js";
 export * from "./types.js";

@@ -19,8 +19,8 @@ Só a API: `pnpm --filter @repo/backend dev`. Variáveis de ambiente em `.env` n
 `.env.example`); sem o arquivo, os defaults batem com o compose. A API sobe mesmo com o banco
 parado: `GET /health` responde `{"status":"ok","db":"down"}` nesse caso.
 
-Dependências do workspace (`@repo/contracts`) são compiladas automaticamente antes, porque o turbo
-resolve `dependsOn: ["^build"]`.
+O turbo compila as dependências do workspace (`@repo/contracts`) antes da API, conforme
+`dependsOn: ["^build"]`.
 
 ## Scripts
 
@@ -52,7 +52,7 @@ resolve `dependsOn: ["^build"]`.
 - Módulos `Subscriptions` e `Cancellations` (controllers, services, DTOs), regras de decisão e os
   agentes (`ScoringAgent`, `ClassificationAgent`).
 - Escolha de ORM/query builder: **livre**. O driver `pg` está disponível; Drizzle, Prisma, TypeORM
-  ou SQL puro são decisões suas, justifique no README.
+  ou SQL puro são opções. Explique a escolha no README.
 - Logging estruturado (pino/winston), validação de input, exception filter global e documentação
   OpenAPI: itens do teste.
 - Serviço no `docker-compose.yml`: o compose da raiz traz só o Postgres hoje.

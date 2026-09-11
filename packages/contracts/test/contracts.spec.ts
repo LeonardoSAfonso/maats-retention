@@ -13,9 +13,9 @@ import {
 } from "../src/index.js";
 
 /**
- * Este pacote é a especificação do teste: os apps consomem daqui, não o
- * contrário. Os testes abaixo travam as regras que o avaliador usa como
- * gabarito, então editar um limiar ou um cenário quebra o `pnpm verify`.
+ * Este pacote define a especificação consumida pelos apps. Os testes fixam as
+ * regras usadas na avaliação, então editar um limiar ou cenário quebra o
+ * `pnpm verify`.
  */
 describe("constantes de regra", () => {
   it("define as faixas e o fallback de timeout", () => {

@@ -26,8 +26,7 @@ O pacote é compilado (`tsc` -> `dist`), então o build dele roda antes do build
 cuida disso com `dependsOn: ["^build"]`, e `pnpm verify` / `pnpm build` já fazem a ordem certa.
 
 **Não edite este pacote.** Ele é a especificação, e a rubrica trata alterá-la como desclassificação.
-Se encontrar um erro ou ambiguidade, escreva no README do seu repositório: apontar com argumento
-conta a favor.
+Se encontrar um erro ou ambiguidade, escreva no README do seu repositório e explique o problema.
 
 ## Cenários (seed e mock determinístico)
 
@@ -43,14 +42,14 @@ conta a favor.
 
 ### Determinismo
 
-Todos os ids (planos, assinantes, assinaturas, eventos) são UUID v7 derivados de forma estável do
+Todos os ids (planos, assinantes, assinaturas, eventos) são UUID v7 derivados de um seed estável do
 `id` do cenário (`fnv1a` + `uuidv7`), então saem iguais a cada execução. O mock do Agente de Scoring
 usa `subscriptionId` como chave: `scenario-*` → `expectedRisk`; `scenario-timeout` →
 `simulateTimeout: true`.
 
 ### Regra de alto valor (fórmula fixada)
 
-Ordene os `priceCents` **distintos** cadastrados no banco de forma crescente;
+Ordene em ordem crescente os `priceCents` **distintos** cadastrados no banco;
 `k = ceil(HIGH_VALUE_PERCENTILE * n)`, com `n` = quantidade de preços distintos; os `k` maiores
 preços são "alto valor". Com os 3 planos do seed: `k = ceil(0.6) = 1` → apenas Premium (R$ 199).
 

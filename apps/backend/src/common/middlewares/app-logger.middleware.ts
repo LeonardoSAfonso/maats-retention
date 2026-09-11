@@ -3,9 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 
 import { safeSerialize } from "@/utils/serialize";
 
-/**
- * Global middleware that logs each HTTP request with a compact, readable format.
- */
+/** Registra cada requisição HTTP em formato compacto. */
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
   private logger = new Logger("HTTP");

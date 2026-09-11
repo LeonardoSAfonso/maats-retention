@@ -13,7 +13,7 @@ Construa um fluxo de auto-atendimento de cancelamento de assinatura recorrente (
 **O que este repositório já entrega:** infraestrutura pronta (monorepo pnpm + turborepo configurado, Postgres no compose, conexão com o banco, `/health`, lint, typecheck, testes e build funcionando nos três pacotes, especificação em `packages/contracts/`).
 **O que você constrói:** modelagem, migrations, seed, endpoints, agentes, regras de decisão, as telas do fluxo, os testes do caminho crítico e o CI.
 
-Antes de começar: leia [`CONTEXT.md`](./CONTEXT.md) (linguagem ubíqua) e [`packages/contracts/README.md`](./packages/contracts/README.md) (contratos, cenários e a fórmula da regra de alto valor).
+Leia [`CONTEXT.md`](./CONTEXT.md) (linguagem ubíqua) e [`packages/contracts/README.md`](./packages/contracts/README.md) (contratos, cenários e fórmula da regra de alto valor) antes de implementar.
 
 ## Setup e verificação local
 
@@ -28,7 +28,7 @@ pnpm dev:frontend    # UI em http://localhost:3001
 pnpm verify          # lint + typecheck + testes dos três pacotes
 ```
 
-`pnpm verify` **já passa hoje**. Ele é o seu loop de feedback: mantenha verde. O turbo cacheia cada tarefa, então rodar de novo sem mudar nada é instantâneo.
+`pnpm verify` **já passa hoje**. Use-o enquanto trabalha para perceber cedo quando alguma mudança quebrou o baseline. O turbo reaproveita o resultado das tarefas sem mudanças, então execuções repetidas costumam terminar rápido.
 
 | Já pronto (não é o teste)                                                                                     | Você faz (é o teste)                                                                  |
 | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -39,18 +39,18 @@ pnpm verify          # lint + typecheck + testes dos três pacotes
 | Next.js 16 com Tailwind 4, shadcn/ui, tokens                                                                  | As 4 telas do fluxo, Server Actions, `<Suspense>`, acessibilidade                     |
 | `@repo/contracts` compilado, consumível pelos dois apps e testado                                             | Mapear o domínio para o schema e usar os contratos                                    |
 
-**Escolhas livres:** ORM, biblioteca de migração, lib de validação, estratégia de mock dos agentes, desenho das telas. Justifique as relevantes no README. O driver `pg` já está instalado, mas você pode trocar.
+Você escolhe ORM, biblioteca de migração, lib de validação, estratégia de mock dos agentes e desenho das telas. Explique as decisões relevantes no README. O driver `pg` já está instalado, mas pode ser trocado.
 
-**Arquivo congelado:** `packages/contracts/` é a especificação. Não edite (um teste dentro do pacote falha se os limiares ou os cenários mudarem, e a edição também aparece no `pnpm verify`). Se achar que a spec está errada, escreva no README: isso conta a seu favor.
+`packages/contracts/` é a especificação e deve ficar intacto. Um teste do pacote falha se os limiares ou os cenários mudarem, e a alteração também aparece no `pnpm verify`. Se encontrar um problema na spec, registre-o no README e explique o motivo.
 
 ## Uso de IA
 
-Pode usar Copilot, Cursor, Claude Code, Codex, o que preferir. A regra é simples: **você responde pelo que entregou**.
+Copilot, Cursor, Claude Code, Codex e outras ferramentas estão liberados. A responsabilidade pelo resultado continua sendo sua.
 
-- **Permitido:** gerar código, testes, migrations, UI e documentação com agente, desde que você entenda, revise e consiga defender cada decisão na conversa final.
-- **Exigido:** diga no README como usou IA (ou que não usou). Não há penalidade por usar, nem por não usar.
-- **Reprovado:** não saber explicar o próprio código; deixar o agente alterar `packages/contracts/`; usar IA para burlar critérios (número hardcoded no lugar da regra, `any` espalhado, teste mascarado para passar).
-- **Sem monitoramento:** o repositório não inclui nenhuma ferramenta de atribuição ou telemetria de IA. O que você roda na sua máquina fica na sua máquina, e o que conta é a conversa final sobre o código entregue.
+- Você pode usar agente para gerar código, testes, migrations, UI e documentação. Revise o material, entenda as decisões e esteja preparado para defendê-las na conversa final.
+- Registre no README como usou IA ou informe que não usou. Nenhuma das duas opções gera penalidade.
+- A entrega reprova se você não souber explicar o próprio código, permitir que o agente altere `packages/contracts/` ou usar IA para contornar critérios, como trocar uma regra por número hardcoded, espalhar `any` ou mascarar um teste.
+- O repositório não monitora uso de IA. A avaliação considera o código entregue e sua explicação na conversa final.
 
 ## O cenário
 
@@ -95,13 +95,13 @@ Você recebe:
 | Zona cinzenta | `>= 0.30` e `<= 0.70` | Encaminha para retenção humana           | `HUMAN_RETENTION` |
 | Alto risco    | `> 0.70`              | Oferta de retenção automática            | `AUTOMATIC_OFFER` |
 
-Os limites são exclusivos: risco exatamente `0.30` ou exatamente `0.70` cai na zona cinzenta. Implemente de forma testável isoladamente, com testes nos limites.
+Os limites são exclusivos: risco exatamente `0.30` ou exatamente `0.70` cai na zona cinzenta. Isole essa regra e cubra os limites com testes.
 
 ### Regra secundária: alto valor recorrente
 
 Assinaturas cujo `plan.priceCents` está no top 20% dos **valores distintos** de plano têm a oferta automática interceptada: em risco alto, vão para retenção humana (`humanReason` descritivo, ex.: `high recurring value at high risk`). Baixo risco e zona cinzenta seguem as regras normais, independentemente do valor.
 
-Fórmula fixada (a mesma de `packages/contracts/README.md`): ordene os `priceCents` distintos de forma crescente, `k = ceil(HIGH_VALUE_PERCENTILE * n)` com `n` = quantidade de preços distintos, e considere alto valor os `k` maiores. Com os 3 planos do seed: `k = 1` → apenas Premium (R$ 199).
+Fórmula fixada (a mesma de `packages/contracts/README.md`): ordene em ordem crescente os `priceCents` distintos, `k = ceil(HIGH_VALUE_PERCENTILE * n)` com `n` = quantidade de preços distintos, e considere alto valor os `k` maiores. Com os 3 planos do seed: `k = 1` → apenas Premium (R$ 199).
 
 O corte tem de ser **derivado do banco** (`SELECT DISTINCT price_cents ...`), não hardcoded por nome de plano ou por valor. O avaliador pode alterar preços do seed e revalidar.
 
@@ -111,7 +111,7 @@ Se o Agente de Scoring não responder dentro de `SCORING_TIMEOUT_MS` (3000 ms), 
 
 O mock precisa **exercitar o caminho real**: no cenário de timeout, a chamada ao agente passa do prazo e é o serviço que aplica o deadline (ex.: `Promise.race` com timer). Devolver `timedOut: true` sem respeitar o prazo não conta. O teste do cenário de timeout pode ser lento de propósito (é o ponto).
 
-### Como o POST se comporta (sem ambiguidade)
+### Comportamento do POST
 
 `POST /cancellations` é **síncrono**: ele aguarda os agentes (200 a 1500 ms de latência simulada, ~3000 ms no cenário de timeout) e devolve o outcome no corpo. Não é necessário fila, job, polling ou webhook.
 
@@ -151,7 +151,7 @@ O mock do Agente de Scoring é chaveado por `subscriptionId`: devolve `expectedR
 ### Backend (NestJS + PostgreSQL)
 
 1. **Modelagem completa:** migrations para todas as entidades de `packages/contracts/src/types.ts` (`Subscriber`, `Plan`, `Subscription`, `EngagementEvent`, `PaymentEvent`, `Cancellation`, `Offer`). Modele status, relacionamentos, risco, faixa e outcome (opcional).
-2. **Seed:** carregue os cenários de `packages/contracts/src/scenarios.ts` no banco de forma reproduzível.
+2. **Seed:** carregue os cenários de `packages/contracts/src/scenarios.ts` no banco de maneira reproduzível.
 3. **Endpoints** da tabela de [Contratos e endpoints](#contratos-e-endpoints) (núcleo).
 4. **Agente de Scoring:** implemente a interface `ScoringAgent`. Mock determinístico para os cenários, com latência simulada e o timeout de [Regras de decisão](#regras-de-decisão). Não chame LLM real no núcleo.
 5. **Regras de decisão** isoladas, testáveis sem HTTP nem banco.
@@ -180,7 +180,7 @@ O mock do Agente de Scoring é chaveado por `subscriptionId`: devolve `expectedR
 ### Dados (PostgreSQL)
 
 1. Schema completo a partir de `packages/contracts/src/types.ts`.
-2. **Justifique índices** nas tabelas transacionais (`Cancellation` ao menos): quais, por quê, com `EXPLAIN` de apoio. O seed é pequeno; o que vale é o raciocínio.
+2. **Justifique índices** nas tabelas transacionais (`Cancellation` ao menos): diga quais índices criou, por quê, e inclua `EXPLAIN` como apoio. O seed é pequeno; a avaliação considera o raciocínio.
 
 ## Diferenciais (stretch)
 
@@ -263,7 +263,7 @@ Sim, e deve: hoje ele só tem o Postgres. No fim, `docker compose up` precisa su
 Não. São stretch e contam no eixo de diferenciais.
 
 **E se eu achar um erro na especificação?**
-Escreva no README (ou abra uma issue no repositório). Apontar o problema com argumento conta a favor; editar `packages/contracts/` em silêncio conta contra.
+Escreva no README ou abra uma issue no repositório. Explique o problema; editar `packages/contracts/` em silêncio conta contra.
 
 **Dúvidas durante o teste?**
 Abra uma issue no repositório ou mande mensagem para quem te enviou o teste. Resposta em até 1 dia útil; não fique travado esperando.

@@ -6,9 +6,8 @@ export const nest = [
   {
     files: ["**/*.ts"],
     rules: {
-      // O Nest resolve dependências pela metadata emitida em runtime
-      // (`emitDecoratorMetadata`). Marcar um provider como `import type` apaga
-      // essa metadata e o injector falha com "Nest can't resolve dependencies".
+      // O Nest resolve dependências pela metadata de runtime emitida por
+      // `emitDecoratorMetadata`. `import type` apaga essa metadata e quebra a DI.
       "@typescript-eslint/consistent-type-imports": "off",
     },
   },

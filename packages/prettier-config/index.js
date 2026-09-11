@@ -1,4 +1,4 @@
-/** Configuração compartilhada: cada pacote aponta para cá via `"prettier": "@repo/prettier-config"`. */
+/** Configuração compartilhada dos pacotes do workspace. */
 export default {
   printWidth: 100,
   proseWrap: "always",

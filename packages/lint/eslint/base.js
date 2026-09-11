@@ -2,11 +2,10 @@ import prettier from "eslint-config-prettier";
 import tseslint from "typescript-eslint";
 
 /**
- * Regras compartilhadas pelos dois apps.
+ * Regras compartilhadas pelos apps.
  *
- * `no-explicit-any` fica como aviso de propósito: a rubrica trata `any` em ponto
- * de decisão como desclassificação, então o aviso precisa aparecer no lint do
- * candidato sem derrubar o build.
+ * `no-explicit-any` fica como aviso porque a rubrica trata `any` em ponto de
+ * decisão como desclassificação. O lint alerta sem impedir o build.
  */
 export const base = tseslint.config(
   {

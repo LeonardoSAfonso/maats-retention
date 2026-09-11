@@ -1,8 +1,7 @@
-# Serviços de infraestrutura do teste (Postgres).
+# Infraestrutura disponível no scaffold: Postgres.
 #
-# Suba apenas o banco com `docker compose up -d db` (ou `pnpm db:up` na raiz).
-# Ao entregar, este arquivo deve conter também os serviços da API e do frontend
-# (`docker compose up` tem de subir o fluxo completo - ver TESTE.md).
+# `docker compose up -d db` (ou `pnpm db:up`) inicia apenas o banco. A entrega
+# deve incluir API e frontend, para que `docker compose up` inicie o fluxo completo.
 
 services:
   db:

@@ -1,14 +1,14 @@
-// ── UUID v7 (RFC 9562) ───────────────────────────────────────────────
+// UUID v7 (RFC 9562)
 //
 // Bit layout (128 bits total):
-//   [0..47]    unix_ts_ms   – Unix timestamp in ms (48 bits)
-//   [48..51]   ver          – Version, MUST be 0x7 = 0b0111 (4 bits)
-//   [52..63]   rand_a       – Random (12 bits)
-//   [64..65]   var          – Variant, MUST be 0b10 (2 bits)
-//   [66..127]  rand_b       – Random (62 bits)
+//   [0..47]    unix_ts_ms   - Unix timestamp in ms (48 bits)
+//   [48..51]   ver          - Version, MUST be 0x7 = 0b0111 (4 bits)
+//   [52..63]   rand_a       - Random (12 bits)
+//   [64..65]   var          - Variant, MUST be 0b10 (2 bits)
+//   [66..127]  rand_b       - Random (62 bits)
 //
 // Hex layout: XXXXXXXX-XXXX-7XXX-VXXX-XXXXXXXXXXXX
-//   V ∈ { 8, 9, a, b }  - variant 0b10 means top nibble is 8–b
+//   V ∈ { 8, 9, a, b }  - variant 0b10 means the top nibble is 8 to b
 //
 // Why a branded type instead of a template-literal type?
 //   Template-literal validation of 32 hex positions creates 16^32 union
@@ -24,7 +24,7 @@ declare const UUIDv7Brand: unique symbol;
  */
 export type UUIDv7 = string & { readonly [UUIDv7Brand]: true };
 
-// ── Bit-level regex ──────────────────────────────────────────────────
+// Bit-level regex.
 // Matches every nibble:
 //   • 8-4-4-4-12 lowercase hex groups separated by hyphens
 //   • Version nibble (pos 13)  → `7`

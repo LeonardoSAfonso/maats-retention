@@ -3,10 +3,10 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": ".",
-    // O pacote é TS puro (sem API de Node), então não carrega tipos globais.
+    // O pacote é TS puro e não usa a API de Node, então não carrega tipos globais.
     "types": [],
-    // Diferente do app Nest, este pacote é consumido direto pelo Node (ESM),
-    // então os imports relativos carregam a extensão `.js` no fonte.
+    // Este pacote é consumido diretamente pelo Node (ESM), então os imports
+    // relativos trazem a extensão `.js` no fonte.
     "module": "nodenext",
     "moduleResolution": "nodenext"
   },

@@ -11,7 +11,7 @@
   ],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    // Resolve relativo a este arquivo, por isso fica aqui e não no pacote.
+    // O caminho é relativo a este arquivo, por isso fica aqui e não no pacote.
     "paths": {
       "@/*": ["./src/*"]
     },

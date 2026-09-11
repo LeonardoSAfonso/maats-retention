@@ -1,14 +1,13 @@
 {
   "extends": "@repo/tsconfig/nest.json",
   "compilerOptions": {
-    // Os `paths` ficam aqui (e não no pacote compartilhado) porque resolvem
-    // relativo a este arquivo.
+    // `paths` fica aqui porque os caminhos são relativos a este arquivo.
     "paths": {
       "@/*": ["./src/*"]
     },
     "types": ["vitest/globals", "node"],
 
-    // Relativo a este arquivo (não ao config compartilhado).
+    // Relativo a este arquivo, não ao config compartilhado.
     "outDir": "./dist"
   },
   "include": ["src", "test", "*.config.ts"],

@@ -31,10 +31,8 @@ export interface Scenario {
   simulateTimeout?: boolean | undefined;
 }
 
-// ── Deterministic UUID v7 seeds ──────────────────────────────────────
-// Every entity id is derived from a stable string seed via FNV-1a, so ids
-// are reproducible across runs (the mock ScoringAgent is keyed by
-// subscriptionId) while remaining valid RFC 9562 UUID v7s.
+// Each entity id comes from a stable FNV-1a seed. This keeps ids reproducible
+// across runs while preserving valid RFC 9562 UUID v7s.
 
 function fnv1a(seed: string, offset: number): number {
   let hash = (0x811c9dc5 ^ offset) >>> 0;
@@ -45,7 +43,7 @@ function fnv1a(seed: string, offset: number): number {
   return hash >>> 0;
 }
 
-/** Deterministic RFC 9562 UUID v7 derived from `seed`. */
+/** Returns an RFC 9562 UUID v7 derived deterministically from `seed`. */
 function uuidv7(seed: string): UUIDv7 {
   const h0 = fnv1a(seed, 0x9e3779b9);
   const h1 = fnv1a(seed, 0x85ebca6b);
@@ -109,11 +107,7 @@ interface ScenarioSeed {
   simulateTimeout?: boolean | undefined;
 }
 
-/**
- * Builds a full Scenario from a seed, wiring every foreign key by
- * construction: subscription.subscriberId → subscriber.id,
- * subscription.planId → plan.id, events → subscription.id.
- */
+/** Builds a scenario and wires its subscription and event foreign keys. */
 function makeScenario(seed: ScenarioSeed): Scenario {
   const subscriberId = uuidv7(`subscriber:${seed.id}`);
   const subscriptionId = uuidv7(`subscription:${seed.id}`);

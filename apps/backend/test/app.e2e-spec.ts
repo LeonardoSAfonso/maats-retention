@@ -13,7 +13,7 @@ describe("GET /health (e2e)", () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      // O e2e nao depende de um Postgres real: o pool e substituido.
+      // O teste substitui o pool, então não precisa de um Postgres real.
       .overrideProvider(DB_POOL)
       .useValue({ query: () => Promise.resolve({ rows: [] }) })
       .compile();

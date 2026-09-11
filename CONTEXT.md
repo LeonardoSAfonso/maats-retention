@@ -25,7 +25,7 @@ Perda agregada de assinantes em um período, medida como taxa. O sistema existe 
 _Evitar_: Cancelamento (este é o evento individual), perda
 
 **Agente de Scoring**:
-Componente que atribui um risco de churn (0.00–1.00) a um cancelamento em andamento, a partir de dados do assinante e da assinatura.
+Componente que atribui um risco de churn (0.00 a 1.00) a um cancelamento em andamento, a partir de dados do assinante e da assinatura.
 _Evitar_: Agente de risco, modelo (reservar para o modelo de LLM por trás do agente)
 
 **Agente de Classificação**:
@@ -45,7 +45,7 @@ Registro de cobrança recorrente (em dia, atrasado, falhou) usado como entrada c
 _Evitar_: Cobrança, fatura
 
 **Zona Cinzenta**:
-Faixa intermediária do risco de churn (ex.: 0.30–0.70) em que a decisão entre oferta automática e retenção humana não é determinística; requer desempate humano ou regra secundária.
+Faixa intermediária do risco de churn (ex.: 0.30 a 0.70) em que a decisão entre oferta automática e retenção humana não é determinística; requer desempate humano ou regra secundária.
 _Evitar_: Caso ambíguo, limiar (reservar para threshold de implementação)
 
 **Retenção Humana**:

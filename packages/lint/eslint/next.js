@@ -3,7 +3,7 @@ import nextTypescript from "eslint-config-next/typescript";
 
 import { base } from "./base.js";
 
-/** Config do frontend (Next.js App Router). */
+/** Configuração do frontend em Next.js App Router. */
 export const next = [
   ...base,
   ...nextCoreWebVitals,

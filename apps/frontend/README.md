@@ -31,8 +31,8 @@ para a API (default `http://localhost:3000`).
 | `typecheck` | `next typegen && tsc --noEmit`            |
 | `format`    | Prettier                                  |
 
-`next typegen` roda antes do `tsc` porque os tipos de rota (`LayoutProps`, `PageProps`) são gerados
-pelo Next e não existem em um clone limpo.
+`next typegen` roda antes do `tsc` porque o Next gera tipos de rota (`LayoutProps`, `PageProps`) que
+não existem em um clone limpo.
 
 ## O que já existe
 
