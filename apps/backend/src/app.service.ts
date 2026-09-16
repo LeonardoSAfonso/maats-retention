@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { Pool } from "pg";
 
-import { DB_POOL } from "@/db/db.module";
+import { DB_POOL } from "./db/db.module.js";
 
 export interface HealthStatus {
   status: "ok";

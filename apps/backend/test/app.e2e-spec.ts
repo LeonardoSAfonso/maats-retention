@@ -3,8 +3,8 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import request from "supertest";
 import type { App } from "supertest/types";
 
-import { AppModule } from "@/app.module";
-import { DB_POOL } from "@/db/db.module";
+import { AppModule } from "../src/app.module.js";
+import { DB_POOL } from "../src/db/db.module.js";
 
 describe("GET /health (e2e)", () => {
   let app: INestApplication<App>;

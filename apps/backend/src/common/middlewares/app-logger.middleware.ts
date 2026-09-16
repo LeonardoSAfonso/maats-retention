@@ -1,7 +1,7 @@
 import { Injectable, Logger, type NestMiddleware } from "@nestjs/common";
 import type { NextFunction, Request, Response } from "express";
 
-import { safeSerialize } from "@/utils/serialize";
+import { safeSerialize } from "../../utils/serialize.js";
 
 /** Registra cada requisição HTTP em formato compacto. */
 @Injectable()

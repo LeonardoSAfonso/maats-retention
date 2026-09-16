@@ -1,7 +1,7 @@
 import { Test, type TestingModule } from "@nestjs/testing";
 
 import { AppService } from "./app.service";
-import { DB_POOL } from "@/db/db.module";
+import { DB_POOL } from "./db/db.module.js";
 
 describe("AppService.health", () => {
   async function createService(query: () => Promise<unknown>): Promise<AppService> {

@@ -1,9 +1,9 @@
 import { type MiddlewareConsumer, type NestModule, Module } from "@nestjs/common";
 
-import { AppController } from "@/app.controller";
-import { AppService } from "@/app.service";
-import { AppLoggerMiddleware } from "@/common/middlewares/app-logger.middleware";
-import { DbModule } from "@/db/db.module";
+import { AppController } from "./app.controller.js";
+import { AppService } from "./app.service.js";
+import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware.js";
+import { DbModule } from "./db/db.module.js";
 
 @Module({
   imports: [DbModule],
