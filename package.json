@@ -22,7 +22,9 @@
     "format:root": "prettier --write \"*.md\" \".github/**/*.yml\"",
     "clean": "turbo run clean && rm -rf node_modules",
     "db:up": "docker compose up -d db",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @repo/backend db:migrate",
+    "db:seed": "pnpm --filter @repo/backend db:seed"
   },
   "devDependencies": {
     "lefthook": "^2.1.12",

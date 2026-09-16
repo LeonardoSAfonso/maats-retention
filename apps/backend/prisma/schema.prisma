@@ -1,0 +1,174 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAUSED
+}
+
+enum EngagementType {
+  LOGIN
+  PLAYBACK
+  DOWNLOAD
+  INTERACTION
+}
+
+enum PaymentStatus {
+  ON_TIME
+  LATE
+  FAILED
+}
+
+enum ReasonCategory {
+  PRICE
+  LACK_OF_USE
+  TECHNICAL_ISSUE
+  COMPETITION
+  OTHER
+}
+
+enum RiskBand {
+  LOW
+  GREY
+  HIGH
+}
+
+enum OfferType {
+  DISCOUNT
+  UPGRADE
+  PAUSE
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum OutcomeType {
+  CANCELLED
+  AUTOMATIC_OFFER
+  HUMAN_RETENTION
+}
+
+model Plan {
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String
+  priceCents    Int            @map("price_cents")
+  cycle         BillingCycle
+  benefits      String[]
+  createdAt     DateTime       @default(now()) @map("created_at")
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscriber {
+  id            String         @id @default(uuid()) @db.Uuid
+  name          String
+  email         String         @unique
+  createdAt     DateTime       @default(now()) @map("created_at")
+  subscriptions Subscription[]
+
+  @@map("subscribers")
+}
+
+model Subscription {
+  id               String            @id @default(uuid()) @db.Uuid
+  subscriberId     String            @map("subscriber_id") @db.Uuid
+  planId           String            @map("plan_id") @db.Uuid
+  startedAt        DateTime          @map("started_at")
+  status           SubscriptionStatus
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  subscriber       Subscriber        @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  plan             Plan              @relation(fields: [planId], references: [id], onDelete: Restrict)
+  engagementEvents EngagementEvent[]
+  paymentEvents    PaymentEvent[]
+  cancellations    Cancellation[]
+
+  @@index([subscriberId])
+  @@index([planId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model EngagementEvent {
+  id             String         @id @default(uuid()) @db.Uuid
+  subscriptionId String         @map("subscription_id") @db.Uuid
+  type           EngagementType
+  occurredAt     DateTime       @map("occurred_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  subscription   Subscription   @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([occurredAt])
+  @@map("engagement_events")
+}
+
+model PaymentEvent {
+  id             String        @id @default(uuid()) @db.Uuid
+  subscriptionId String        @map("subscription_id") @db.Uuid
+  amountCents    Int           @map("amount_cents")
+  status         PaymentStatus
+  date           DateTime
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([date])
+  @@map("payment_events")
+}
+
+model Cancellation {
+  id             String          @id @default(uuid()) @db.Uuid
+  subscriptionId String          @map("subscription_id") @db.Uuid
+  rawReason      String          @map("raw_reason")
+  reasonCategory ReasonCategory? @map("reason_category")
+  risk           Float?
+  band           RiskBand?
+  outcomeType    OutcomeType?    @map("outcome_type")
+  humanReason    String?         @map("human_reason")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  subscription   Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  offers         Offer[]
+
+  @@index([subscriptionId])
+  @@index([band])
+  @@index([outcomeType])
+  @@index([createdAt])
+  @@map("cancellations")
+}
+
+model Offer {
+  id             String       @id @default(uuid()) @db.Uuid
+  cancellationId String       @map("cancellation_id") @db.Uuid
+  type           OfferType
+  amountCents    Int?         @map("amount_cents")
+  status         OfferStatus  @default(PENDING)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  cancellation   Cancellation @relation(fields: [cancellationId], references: [id], onDelete: Cascade)
+
+  @@index([cancellationId])
+  @@index([status])
+  @@map("offers")
+}

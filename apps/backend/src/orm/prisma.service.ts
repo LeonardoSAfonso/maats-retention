@@ -1,0 +1,21 @@
+import { Injectable, Logger, type OnApplicationShutdown, type OnModuleInit } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnApplicationShutdown {
+  private readonly logger = new Logger(PrismaService.name);
+
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.$connect();
+    } catch (error) {
+      this.logger.warn(`Prisma connection unavailable at startup: ${String(error)}`);
+    }
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    await this.$disconnect();
+  }
+}
+
+export default PrismaService;

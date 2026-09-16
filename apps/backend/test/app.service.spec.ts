@@ -1,7 +1,7 @@
 import { Test, type TestingModule } from "@nestjs/testing";
-
-import { AppService } from "./app.service";
-import { DB_POOL } from "./db/db.module.js";
+import { describe, expect, it } from "vitest";
+import { AppService } from "../src/app.service.js";
+import { DB_POOL } from "../src/orm/orm.module.js";
 
 describe("AppService.health", () => {
   async function createService(query: () => Promise<unknown>): Promise<AppService> {
@@ -15,12 +15,18 @@ describe("AppService.health", () => {
   it("reporta db up quando o pool responde", async () => {
     const service = await createService(() => Promise.resolve({ rows: [] }));
 
-    await expect(service.health()).resolves.toMatchObject({ status: "ok", db: "up" });
+    await expect(service.health()).resolves.toMatchObject({
+      status: "ok",
+      db: "up",
+    });
   });
 
   it("reporta db down quando o pool falha, sem derrubar a aplicacao", async () => {
     const service = await createService(() => Promise.reject(new Error("ECONNREFUSED")));
 
-    await expect(service.health()).resolves.toMatchObject({ status: "ok", db: "down" });
+    await expect(service.health()).resolves.toMatchObject({
+      status: "ok",
+      db: "down",
+    });
   });
 });

@@ -4,7 +4,7 @@ import request from "supertest";
 import type { App } from "supertest/types";
 
 import { AppModule } from "../src/app.module.js";
-import { DB_POOL } from "../src/db/db.module.js";
+import { DB_POOL } from "../src/orm/orm.module.js";
 
 describe("GET /health (e2e)", () => {
   let app: INestApplication<App>;
