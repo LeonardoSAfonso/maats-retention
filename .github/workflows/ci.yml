@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/smart_retention?schema=public
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,11 +48,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup environment files
+        run: |
+          cp .env.example .env
+          cp apps/backend/.env.example apps/backend/.env
+
+      - name: Start database service (Docker Compose)
+        run: docker compose up -d --wait db
+
       - name: Generate Prisma Client
         run: pnpm --filter @repo/backend db:generate
+
+      - name: Run database migrations
+        run: pnpm --filter @repo/backend db:migrate
+
+      - name: Seed test database
+        run: pnpm --filter @repo/backend db:seed
 
       - name: Run verification (lint, typecheck, test, test:e2e)
         run: pnpm verify
 
       - name: Check production builds
         run: pnpm build
+
+      - name: Teardown Docker Compose
+        if: always()
+        run: docker compose down -v

@@ -154,14 +154,19 @@ A integridade do repositório é validada de forma automatizada a cada push e pu
 - **Cache Duplo de Alta Performance**:
   - Cache global da store do `pnpm` gerenciado nativamente pelo `actions/setup-node@v4`.
   - Cache de compilação do Turborepo (`.turbo`) preservado via `actions/cache@v4` baseado no hash de `turbo.json` e `pnpm-lock.yaml`.
+- **Banco de Dados Efêmero de Testes (Docker Compose)**:
+  - O runner utiliza o próprio `docker-compose.yml` do projeto (`docker compose up -d --wait db`) com healthcheck `pg_isready`, garantindo paridade exata de ambiente entre local e CI, além de limpeza automática de volumes ao final (`docker compose down -v`).
 - **Etapas Sequenciais da Esteira**:
   1. `Checkout`: com `fetch-depth: 2`.
   2. `Setup pnpm & Node.js 22`: com restauração de cache de dependências.
   3. `Restore Turborepo Cache`: recuperação de artefatos cacheados.
   4. `Install Dependencies`: `pnpm install --frozen-lockfile` determinístico.
-  5. `Generate Prisma Client`: `pnpm --filter @repo/backend db:generate`.
-  6. `Run Verification`: `pnpm verify` (lint + typecheck + testes unitários + testes e2e).
-  7. `Check Production Builds`: `pnpm build` (garantia de compilação de produção para Next.js e NestJS).
+  5. `Start Database Service`: `docker compose up -d --wait db` iniciando o PostgreSQL 17 do projeto.
+  6. `Generate Prisma Client`: `pnpm --filter @repo/backend db:generate`.
+  7. `Run Migrations & Seed`: `pnpm --filter @repo/backend db:migrate` e `pnpm --filter @repo/backend db:seed` para disponibilizar os 7 cenários canônicos para os testes e2e.
+  8. `Run Verification`: `pnpm verify` (lint + typecheck + testes unitários + testes e2e reais).
+  9. `Check Production Builds`: `pnpm build` (garantia de compilação de produção para Next.js e NestJS).
+  10. `Teardown`: `docker compose down -v` ao final da execução.
 
 ---
 
