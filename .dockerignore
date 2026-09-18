@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Git & VCS
+.git
+.gitignore
+
+# Turborepo cache & build outputs
+.turbo
+**/dist
+**/.next
+**/.tsbuildinfo
+
+# Tests and coverage
+coverage
+**/coverage
+vitest.config.e2e.ts.timestamp*
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and OS
+.vscode
+.idea
+.agents
+.DS_Store
+*.swp
+*.swo
+
+# Local environment overrides
+.env.local
+.env.*.local
