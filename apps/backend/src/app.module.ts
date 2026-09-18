@@ -2,6 +2,7 @@ import { type MiddlewareConsumer, type NestModule, Module } from "@nestjs/common
 
 import { AppController } from "./app.controller.js";
 import { AppService } from "./app.service.js";
+import { CorrelationMiddleware } from "./common/logger/correlation.middleware.js";
 import { AppLoggerMiddleware } from "./common/middlewares/app-logger.middleware.js";
 import { OrmModule } from "./orm/orm.module.js";
 import { PlanModule } from "./plan/plan.module.js";
@@ -30,6 +31,6 @@ import { ReasonKeywordModule } from "./reason-keyword/reason-keyword.module.js";
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(AppLoggerMiddleware).forRoutes("{*splat}");
+    consumer.apply(CorrelationMiddleware, AppLoggerMiddleware).forRoutes("{*splat}");
   }
 }

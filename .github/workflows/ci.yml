@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: Lint, Typecheck & Tests (Verify)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/smart_retention?schema=public
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Cache Turborepo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup environment files
+        run: |
+          cp .env.example .env
+          cp apps/backend/.env.example apps/backend/.env
+
+      - name: Start database service (Docker Compose)
+        run: docker compose up -d --wait db
+
+      - name: Build shared contracts
+        run: pnpm --filter @repo/contracts build
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @repo/backend db:generate
+
+      - name: Run database migrations
+        run: pnpm --filter @repo/backend db:migrate
+
+      - name: Seed test database
+        run: pnpm --filter @repo/backend db:seed
+
+      - name: Run verification (lint, typecheck, test, test:e2e)
+        run: pnpm verify
+
+      - name: Check production builds
+        run: pnpm build
+
+      - name: Teardown Docker Compose
+        if: always()
+        run: docker compose down -v

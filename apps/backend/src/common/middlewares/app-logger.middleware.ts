@@ -3,10 +3,10 @@ import type { NextFunction, Request, Response } from "express";
 
 import { safeSerialize } from "../../utils/serialize.js";
 
-/** Registra cada requisição HTTP em formato compacto. */
+/** Registra cada requisição HTTP em formato estruturado. */
 @Injectable()
 export class AppLoggerMiddleware implements NestMiddleware {
-  private logger = new Logger("HTTP");
+  private readonly logger = new Logger("HTTP");
 
   use(request: Request, response: Response, next: NextFunction): void {
     const method: string = request.method;
@@ -18,15 +18,20 @@ export class AppLoggerMiddleware implements NestMiddleware {
       const durationMs = Number((process.hrtime.bigint() - startedAt) / 1000000n);
       const payload: string = safeSerialize(request.body as unknown);
 
-      this.logger.log(
-        `Received {${url}, ${method}, ${String(statusCode)}} \x1b[33m+${String(
-          durationMs,
-        )}ms\x1b[0m`,
-      );
+      this.logger.log(`HTTP ${method} ${url} ${statusCode} +${durationMs}ms`, {
+        method,
+        url,
+        statusCode,
+        durationMs,
+      });
 
-      this.logger.verbose(`Body ${payload}`);
+      if (payload && payload !== "{}" && payload !== "null") {
+        this.logger.verbose(`HTTP Request Body: ${payload}`);
+      }
     });
 
     next();
   }
 }
+
+export default AppLoggerMiddleware;
