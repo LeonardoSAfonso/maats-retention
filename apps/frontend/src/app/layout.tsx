@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 
-import { Geist_Mono, Roboto, Montserrat } from "next/font/google";
+import { Geist_Mono, Montserrat, Roboto } from "next/font/google";
+import { SubscriberSessionProvider } from "@/contexts/subscriber-session-context";
+import { ClaroFooter } from "@/components/layout/claro-footer";
+import { ClaroHeader } from "@/components/layout/claro-header";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
@@ -14,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Retenção Inteligente",
-  description: "PoC de cancelamento com retenção inteligente - teste técnico Dev Sr Fullstack",
+  title: "Minha Claro - Gestão de Assinaturas e Cancelamento",
+  description: "Portal de autoatendimento Minha Claro - PoC de Retenção Inteligente",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -31,7 +34,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         montserratHeading.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-slate-50/50 text-foreground">
+        <SubscriberSessionProvider>
+          <ClaroHeader />
+          <div className="flex-1 flex flex-col">{children}</div>
+          <ClaroFooter />
+        </SubscriberSessionProvider>
+      </body>
     </html>
   );
 }
