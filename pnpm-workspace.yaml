@@ -7,6 +7,7 @@ packages:
 allowBuilds:
   "@prisma/client": true
   "@prisma/engines": true
+  "@scarf/scarf": false
   lefthook: true
   prisma: true
   sharp: true

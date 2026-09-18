@@ -20,6 +20,15 @@ Construído com **Next.js 16 (App Router, Tailwind CSS, Base UI, Mondrian Claro 
    - [Fase 4: Frontend Next.js (Experiência Claro & Autoatendimento)](#fase-4-frontend-nextjs)
    - [Fase 5: Métricas da PoC & Impacto Econômico](#fase-5-métricas-da-poc--impacto-econômico)
 4. [Decisões Técnicas e Trade-offs ("Por que fizemos assim")](#4-decisões-técnicas-e-trade-offs)
+   - [4.1. Por que Prisma ORM v6?](#41-por-que-prisma-orm-v6)
+   - [4.2. Por que Imports ESM Nativos com Extensão `.js` no Backend?](#42-por-que-imports-esm-nativos-com-extensão-js-no-backend)
+   - [4.3. Por que Palavras-Chave de Classificação no Banco (`reason_keywords`)?](#43-por-que-palavras-chave-de-classificação-no-banco-reason_keywords)
+   - [4.4. Por que Cálculo Dinâmico de Alto Valor no Banco de Dados?](#44-por-que-cálculo-dinâmico-de-alto-valor-no-banco-de-dados)
+   - [4.5. Por que Latência Síncrona Real e Proibição de `setTimeout`?](#45-por-que-latência-síncrona-real-e-proibição-de-settimeout)
+   - [4.6. Por que `useSyncExternalStore` no Frontend?](#46-por-que-usesyncexternalstore-no-frontend)
+   - [4.7. Regra da Oferta Automática de Retenção](#47-regra-da-oferta-automática-de-retenção)
+   - [4.8. Por que Logging Estruturado com Pino e AsyncLocalStorage?](#48-por-que-logging-estruturado-com-pino-e-asynclocalstorage)
+   - [4.9. Por que Documentação Interativa com OpenAPI / Swagger Decorado?](#49-por-que-documentação-interativa-com-openapi--swagger-decorado)
 5. [Justificativa dos Índices & Planos de Execução (EXPLAIN)](#5-justificativa-dos-índices--planos-de-execução-explain)
 6. [Adapter LLM Real (Gemini / OpenAI)](#6-adapter-llm-real-gemini--openai)
 7. [Escopo: Núcleo vs. Diferenciais (Stretch Goals)](#7-escopo-núcleo-vs-diferenciais)
@@ -115,6 +124,8 @@ docker compose up -d --build
 
 - **Frontend (Minha Claro)**: `http://localhost:3001`
 - **Backend API**: `http://localhost:3000`
+- **Documentação Swagger UI**: `http://localhost:3000/docs`
+- **Especificação OpenAPI JSON**: `http://localhost:3000/docs-json`
 - **Healthcheck**: `http://localhost:3000/health` (`{"status":"ok","db":"up"}`)
 - **PostgreSQL**: `localhost:5432`
 
@@ -159,7 +170,9 @@ Este comando roda em pipeline e valida:
 
 - **Arquitetura Modular**: Módulos organizados por bounded contexts (`SubscriptionModule`, `CancellationModule`, `DecisionModule`, `AgentModule`, `MetricsModule`, `OrmModule`).
 - **Injeção de Dependências**: Provider de Scoring configurado como interface injetável `SCORING_AGENT`, permitindo substituição transparente entre o adapter determinístico (`DeterministicScoringAgent`), o adapter LLM (`GeminiScoringAgent`) ou fakes em testes.
-- **Validação e Tratamento Global**: `ValidationPipe` estrito (com `whitelist` e `forbidNonWhitelisted`) e `HttpExceptionFilter` padronizando respostas de erro com status codes HTTP semânticos (400, 404, 409, 500).
+- **Validação e Tratamento Global**: `ValidationPipe` estrito (com `whitelist` e `forbidNonWhitelisted`) e `HttpExceptionFilter` padronizando respostas de erro com status codes HTTP semânticos (400, 404, 409, 500) e injeção do identificador de correlação (`correlationId`).
+- **Documentação Interativa Swagger / OpenAPI 3.0**: `@nestjs/swagger` configurado em `/docs` (com download de schema em `/docs-json`), decorando DTOs e controllers com tags temáticas, descrições ricas, parâmetros de rota e respostas tipadas.
+- **Logging Estruturado de Alta Performance (Pino)**: Substituição de saídas de texto por JSON estruturado em stdout contendo `timestamp` ISO 8601, `level`, `context` e rastreamento distribuído de requisições com `correlationId` (`x-request-id` preservado ou gerado via UUID v4 e propagado por `AsyncLocalStorage`).
 - **Suíte de Testes**: 125+ testes unitários e testes e2e cobrindo os 7 cenários do gabarito, cenários de borda e concorrência.
 
 ### Fase 4: Frontend Next.js
@@ -231,6 +244,18 @@ Este comando roda em pipeline e valida:
   - `amountCents: Math.round(plan.priceCents * 0.20)` (desconto de 20% na mensalidade do plano).
 - O assinante visualiza o novo valor com desconto e pode aceitar (`POST /cancellations/:id/accept` → `OfferStatus.ACCEPTED`) ou recusar (`POST /cancellations/:id/decline` → `OfferStatus.DECLINED`), refletindo diretamente nas métricas de retenção da PoC.
 
+### 4.8. Por que Logging Estruturado com Pino e AsyncLocalStorage?
+
+- **Zero Overhead & Formato Cloud-Native**: O Pino foi escolhido por ser o logger JSON mais rápido do ecossistema Node.js, gerando saídas estruturadas prontas para ingestão em Datadog, ElasticSearch/OpenSearch ou Grafana Loki sem parsing regex custoso.
+- **Rastreamento de Ponta a Ponta sem Poluir Assinaturas de Métodos**: Em vez de repassar objetos `req` ou `correlationId` por todos os serviços, controllers e handlers, utilizamos a API nativa `AsyncLocalStorage` do Node.js (`node:async_hooks`). Um middleware inicial captura o header `x-request-id` (ou gera um UUID v4) e o logger o anexa automaticamente a qualquer mensagem ou erro disparado no ciclo daquela requisição.
+- **Transparência no Erro do Cliente**: Em caso de falha (HTTP 4xx ou 5xx), o `correlationId` é devolvido no payload de erro (`HttpExceptionFilter`), permitindo ao usuário ou suporte correlacionar instantaneamente o chamado com o log de erro no servidor.
+
+### 4.9. Por que Documentação Interativa com OpenAPI / Swagger Decorado?
+
+- **Contrato Vivo e Auditável**: Em vez de manter documentação estática sujeita a desatualização, decorators oficiais do `@nestjs/swagger` (`@ApiProperty`, `@ApiOperation`, `@ApiResponse`, `@ApiTags`) foram aplicados nos DTOs e Controllers existentes.
+- **Facilidade para Avaliadores e Integrações**: A interface gráfica interativa do Swagger UI em `/docs` permite testar e inspecionar os endpoints diretamente pelo navegador, com exemplos realistas de payloads de entrada e saída.
+- **Compatibilidade com Ferramentas de SDK**: O endpoint `/docs-json` expõe a especificação OpenAPI 3.0 canônica, permitindo geração automática de clientes tipados para frontends ou outros microsserviços.
+
 ---
 
 ## 5. Justificativa dos Índices & Planos de Execução (EXPLAIN)
@@ -299,23 +324,24 @@ Além do mock determinístico calibrado para os 7 cenários, a aplicação inclu
 
 ## 7. Escopo: Núcleo vs. Diferenciais
 
-| Item do Desafio                     | Requisito | Status na PoC | Detalhes da Implementação                                                                      |
-| :---------------------------------- | :-------: | :-----------: | :--------------------------------------------------------------------------------------------- |
-| **Modelagem e Migrations**          |  Núcleo   |    ✅ 100%    | Schema Prisma com todas as entidades, enums e migrations auditáveis.                           |
-| **Seed Reproduzível**               |  Núcleo   |    ✅ 100%    | Popula planos, os 7 cenários oficiais e eventos associados.                                    |
-| **Endpoints do Ciclo de Vida**      |  Núcleo   |    ✅ 100%    | `GET /subscriptions`, `POST /cancellations`, `GET /cancellations/:id`.                         |
-| **Agente de Scoring & Regras**      |  Núcleo   |    ✅ 100%    | Limiares `<0.30`, `0.30-0.70`, `>0.70`, alto valor dinâmico e timeout real com `Promise.race`. |
-| **Dependency Injection**            |  Núcleo   |    ✅ 100%    | Injeção desacoplada de `ScoringAgent` e `ClassificationAgent`.                                 |
-| **Logging Estruturado**             |  Núcleo   |    ✅ 100%    | Logger contextual NestJS sem `console.log`.                                                    |
-| **Validação e Filtros**             |  Núcleo   |    ✅ 100%    | `ValidationPipe` estrito e `HttpExceptionFilter`.                                              |
-| **Docker Compose**                  |  Núcleo   |    ✅ 100%    | Orquestra Postgres, Backend API e Frontend.                                                    |
-| **Testes Automatizados**            |  Núcleo   |    ✅ 100%    | 125+ testes unitários e e2e cobrindo caminhos felizes, bordas e timeout.                       |
-| **Telas do Fluxo (4 etapas)**       |  Núcleo   |    ✅ 100%    | Iniciar, Motivo livre, Processamento real síncrono e Resultado.                                |
-| **Agente de Classificação**         | _Stretch_ |    ✅ 100%    | Dicionário no banco (`reason_keywords`) rodando em paralelo via `Promise.all`.                 |
-| **Adapter LLM Real**                | _Stretch_ |    ✅ 100%    | `GeminiScoringAgent` com JSON mode e fallback automático.                                      |
-| **Ações de Aceitar/Recusar Oferta** | _Stretch_ |    ✅ 100%    | `POST /cancellations/:id/accept` e `POST /cancellations/:id/decline` integrados na UI.         |
-| **Dashboard de Métricas**           | _Stretch_ |    ✅ 100%    | `GET /metrics` e tela `/metricas` com taxa de retenção, custos evitados e faixas de risco.     |
-| **Design Polido (Mondrian Claro)**  | _Stretch_ |    ✅ 100%    | Tokens visuais Claro, animações de pulso, accordion e navegação por teclado (a11y).            |
+| Item do Desafio                     | Requisito | Status na PoC | Detalhes da Implementação                                                                                |
+| :---------------------------------- | :-------: | :-----------: | :------------------------------------------------------------------------------------------------------- |
+| **Modelagem e Migrations**          |  Núcleo   |    ✅ 100%    | Schema Prisma com todas as entidades, enums e migrations auditáveis.                                     |
+| **Seed Reproduzível**               |  Núcleo   |    ✅ 100%    | Popula planos, os 7 cenários oficiais e eventos associados.                                              |
+| **Endpoints do Ciclo de Vida**      |  Núcleo   |    ✅ 100%    | `GET /subscriptions`, `POST /cancellations`, `GET /cancellations/:id`.                                   |
+| **Agente de Scoring & Regras**      |  Núcleo   |    ✅ 100%    | Limiares `<0.30`, `0.30-0.70`, `>0.70`, alto valor dinâmico e timeout real com `Promise.race`.           |
+| **Dependency Injection**            |  Núcleo   |    ✅ 100%    | Injeção desacoplada de `ScoringAgent` e `ClassificationAgent`.                                           |
+| **Logging Estruturado**             |  Núcleo   |    ✅ 100%    | Pino JSON logger com ISO 8601, contexto e correlação distribuída (`AsyncLocalStorage` / `x-request-id`). |
+| **Documentação OpenAPI / Swagger**  |  Núcleo   |    ✅ 100%    | `@nestjs/swagger` configurado em `/docs` e `/docs-json` com DTOs e rotas tipadas e decoradas.            |
+| **Validação e Filtros**             |  Núcleo   |    ✅ 100%    | `ValidationPipe` estrito e `HttpExceptionFilter` com injeção de `correlationId`.                         |
+| **Docker Compose**                  |  Núcleo   |    ✅ 100%    | Orquestra Postgres, Backend API e Frontend.                                                              |
+| **Testes Automatizados**            |  Núcleo   |    ✅ 100%    | 125+ testes unitários e e2e cobrindo caminhos felizes, bordas e timeout.                                 |
+| **Telas do Fluxo (4 etapas)**       |  Núcleo   |    ✅ 100%    | Iniciar, Motivo livre, Processamento real síncrono e Resultado.                                          |
+| **Agente de Classificação**         | _Stretch_ |    ✅ 100%    | Dicionário no banco (`reason_keywords`) rodando em paralelo via `Promise.all`.                           |
+| **Adapter LLM Real**                | _Stretch_ |    ✅ 100%    | `GeminiScoringAgent` com JSON mode e fallback automático.                                                |
+| **Ações de Aceitar/Recusar Oferta** | _Stretch_ |    ✅ 100%    | `POST /cancellations/:id/accept` e `POST /cancellations/:id/decline` integrados na UI.                   |
+| **Dashboard de Métricas**           | _Stretch_ |    ✅ 100%    | `GET /metrics` e tela `/metricas` com taxa de retenção, custos evitados e faixas de risco.               |
+| **Design Polido (Mondrian Claro)**  | _Stretch_ |    ✅ 100%    | Tokens visuais Claro, animações de pulso, accordion e navegação por teclado (a11y).                      |
 
 ---
 

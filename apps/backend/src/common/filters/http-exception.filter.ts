@@ -7,6 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { type Response } from "express";
+import { getCorrelationId } from "../logger/correlation.context.js";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -15,6 +16,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const correlationId = getCorrelationId();
 
     const status =
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -51,6 +53,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: status,
       message,
       ...(details ? { details } : {}),
+      ...(correlationId ? { correlationId } : {}),
       timestamp: new Date().toISOString(),
     });
   }
