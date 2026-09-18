@@ -71,6 +71,15 @@ export const mockPrismaService = {
     count: vi.fn(),
     upsert: vi.fn(),
   },
+  reasonKeyword: {
+    create: vi.fn(),
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    count: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    upsert: vi.fn(),
+  },
 } as unknown as PrismaService;
 
 export const mockPlanData = {
@@ -207,6 +216,23 @@ export const mockCreatePaymentEventDTO = {
   amountCents: 2900,
   status: PaymentStatus.ON_TIME,
   date: "2026-06-05T00:00:00.000Z",
+};
+
+export const mockReasonKeywordData = {
+  id: "01a08178-4e4a-7239-b353-a8e451e04031",
+  term: "expensive",
+  category: ReasonCategory.PRICE,
+  createdAt: new Date("2026-06-15T00:00:00.000Z"),
+  updatedAt: new Date("2026-06-15T00:00:00.000Z"),
+};
+
+export const mockCreateReasonKeywordDTO = {
+  term: "expensive",
+  category: ReasonCategory.PRICE,
+};
+
+export const mockUpdateReasonKeywordDTO = {
+  category: ReasonCategory.OTHER,
 };
 
 export const mockPaginationParams = {

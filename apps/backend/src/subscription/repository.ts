@@ -7,6 +7,13 @@ import { PaginationParams } from "../shared/types/pagination.type.js";
 import { CreateSubscriptionDTO } from "./domain/create.dto.js";
 import { UpdateSubscriptionDTO } from "./domain/update.dto.js";
 
+export type SubscriptionWithDetails = Prisma.SubscriptionGetPayload<{
+  include: {
+    subscriber: true;
+    plan: true;
+  };
+}>;
+
 @Injectable()
 export class SubscriptionRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -43,7 +50,7 @@ export class SubscriptionRepository {
     return { elements, subscriptions };
   }
 
-  public async findById(id: string): Promise<Subscription | null> {
+  public async findById(id: string): Promise<SubscriptionWithDetails | null> {
     return this.prismaService.subscription.findUnique({
       where: { id },
       include: {
@@ -53,7 +60,7 @@ export class SubscriptionRepository {
     });
   }
 
-  public async findDetailById(id: string) {
+  public async findDetailById(id: string): Promise<SubscriptionWithDetails | null> {
     return this.prismaService.subscription.findUnique({
       where: { id },
       include: {

@@ -13,11 +13,15 @@ import { PaginationParams } from "../shared/types/pagination.type.js";
 import { CreateCancellationDTO } from "./domain/create.dto.js";
 import { UpdateCancellationDTO } from "./domain/update.dto.js";
 
+export type CancellationWithOffers = Prisma.CancellationGetPayload<{
+  include: { offers: true };
+}>;
+
 @Injectable()
 export class CancellationRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  public async create(data: CreateCancellationDTO): Promise<Cancellation> {
+  public async create(data: CreateCancellationDTO): Promise<CancellationWithOffers> {
     return this.prismaService.cancellation.create({
       data,
       include: { offers: true },
@@ -43,14 +47,16 @@ export class CancellationRepository {
     return { elements, cancellations };
   }
 
-  public async findById(id: string): Promise<Cancellation | null> {
+  public async findById(id: string): Promise<CancellationWithOffers | null> {
     return this.prismaService.cancellation.findUnique({
       where: { id },
       include: { offers: true },
     });
   }
 
-  public async findBySubscriptionId(subscriptionId: string): Promise<Cancellation | null> {
+  public async findBySubscriptionId(
+    subscriptionId: string,
+  ): Promise<CancellationWithOffers | null> {
     return this.prismaService.cancellation.findFirst({
       where: { subscriptionId },
       include: { offers: true },
@@ -58,7 +64,7 @@ export class CancellationRepository {
     });
   }
 
-  public async update(id: string, data: UpdateCancellationDTO): Promise<Cancellation> {
+  public async update(id: string, data: UpdateCancellationDTO): Promise<CancellationWithOffers> {
     return this.prismaService.cancellation.update({
       where: { id },
       data,
@@ -66,7 +72,7 @@ export class CancellationRepository {
     });
   }
 
-  public async upsert(id: string, data: CreateCancellationDTO): Promise<Cancellation> {
+  public async upsert(id: string, data: CreateCancellationDTO): Promise<CancellationWithOffers> {
     return this.prismaService.cancellation.upsert({
       where: { id },
       create: { id, ...data },

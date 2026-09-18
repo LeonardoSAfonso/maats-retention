@@ -46,6 +46,15 @@ export class PlanRepository {
     });
   }
 
+  public async findDistinctPriceCents(): Promise<number[]> {
+    const plans = await this.prismaService.plan.findMany({
+      select: { priceCents: true },
+      distinct: ["priceCents"],
+      orderBy: { priceCents: "asc" },
+    });
+    return plans.map((p) => p.priceCents);
+  }
+
   public async update(id: string, data: UpdatePlanDTO): Promise<Plan> {
     return this.prismaService.plan.update({
       where: { id },

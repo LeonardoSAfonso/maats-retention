@@ -115,4 +115,23 @@ describe("PlanRepository", () => {
       expect(result).toEqual(mockPlanData);
     });
   });
+
+  describe("findDistinctPriceCents", () => {
+    it("should return distinct priceCents in ascending order", async () => {
+      vi.spyOn(prismaService.plan, "findMany").mockResolvedValue([
+        { priceCents: 2900 } as { priceCents: number } as never,
+        { priceCents: 4900 } as { priceCents: number } as never,
+        { priceCents: 19900 } as { priceCents: number } as never,
+      ]);
+
+      const result = await repository.findDistinctPriceCents();
+
+      expect(prismaService.plan.findMany).toHaveBeenCalledWith({
+        select: { priceCents: true },
+        distinct: ["priceCents"],
+        orderBy: { priceCents: "asc" },
+      });
+      expect(result).toEqual([2900, 4900, 19900]);
+    });
+  });
 });

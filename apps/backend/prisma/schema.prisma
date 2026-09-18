@@ -172,3 +172,14 @@ model Offer {
   @@index([status])
   @@map("offers")
 }
+
+model ReasonKeyword {
+  id        String         @id @default(uuid()) @db.Uuid
+  term      String         @unique
+  category  ReasonCategory
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("reason_keywords")
+}

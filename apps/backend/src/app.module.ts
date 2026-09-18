@@ -10,6 +10,8 @@ import { SubscriptionModule } from "./subscription/subscription.module.js";
 import { CancellationModule } from "./cancellation/cancellation.module.js";
 import { OfferModule } from "./offer/offer.module.js";
 import { EventModule } from "./event/event.module.js";
+import { MetricsModule } from "./metrics/metrics.module.js";
+import { ReasonKeywordModule } from "./reason-keyword/reason-keyword.module.js";
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { EventModule } from "./event/event.module.js";
     CancellationModule,
     OfferModule,
     EventModule,
+    MetricsModule,
+    ReasonKeywordModule,
   ],
   controllers: [AppController],
   providers: [AppService],

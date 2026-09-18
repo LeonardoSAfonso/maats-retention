@@ -1,0 +1,2 @@
+export const SCORING_AGENT = Symbol("SCORING_AGENT");
+export const CLASSIFICATION_AGENT = Symbol("CLASSIFICATION_AGENT");

@@ -10,25 +10,25 @@ export class CreateCancellationDTO {
 
   @IsOptional()
   @IsEnum(ReasonCategory)
-  reasonCategory?: ReasonCategory;
+  reasonCategory?: ReasonCategory | null;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(1)
-  risk?: number;
+  risk?: number | null;
 
   @IsOptional()
   @IsEnum(RiskBand)
-  band?: RiskBand;
+  band?: RiskBand | null;
 
   @IsOptional()
   @IsEnum(OutcomeType)
-  outcomeType?: OutcomeType;
+  outcomeType?: OutcomeType | null;
 
   @IsOptional()
   @IsString()
-  humanReason?: string;
+  humanReason?: string | null;
 }
 
 export default CreateCancellationDTO;

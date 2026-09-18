@@ -1,9 +1,12 @@
 import { Module } from "@nestjs/common";
 import { SubscriptionRepository } from "./repository.js";
+import { SubscriptionController } from "./subscription.controller.js";
+import { SubscriptionService } from "./subscription.service.js";
 
 @Module({
-  providers: [SubscriptionRepository],
-  exports: [SubscriptionRepository],
+  controllers: [SubscriptionController],
+  providers: [SubscriptionRepository, SubscriptionService],
+  exports: [SubscriptionRepository, SubscriptionService],
 })
 export class SubscriptionModule {}
 
