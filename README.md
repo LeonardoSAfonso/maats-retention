@@ -13,6 +13,7 @@ Construído com **Next.js 16 (App Router, Tailwind CSS, Base UI, Mondrian Claro 
    - [Execução Local com pnpm](#execução-local-com-pnpm)
    - [Execução com Docker Compose](#execução-com-docker-compose)
    - [Verificação e Testes](#verificação-e-testes)
+   - [Pipeline de CI/CD (GitHub Actions)](#pipeline-de-cicd-github-actions)
 3. [Jornada de Desenvolvimento (O Caminho Percorrido)](#3-jornada-de-desenvolvimento-o-caminho-percorrido)
    - [Fase 1: Persistência & Modelagem (PostgreSQL & Prisma)](#fase-1-persistência--modelagem)
    - [Fase 2: Motor de Decisão & Camada de Inteligência (Agentes)](#fase-2-motor-de-decisão--camada-de-inteligência)
@@ -142,6 +143,25 @@ Este comando roda em pipeline e valida:
 - **`@repo/contracts`**: Testes unitários de invariantes e compilação TypeScript (`tsc`).
 - **`@repo/backend`**: Lint (`eslint`), verificação de tipos (`tsc`), 125+ testes unitários e testes e2e (`vitest`).
 - **`@repo/frontend`**: Lint (`eslint`), geração de rotas tipadas e typecheck (`next typegen && tsc --noEmit`).
+
+### Pipeline de CI/CD (GitHub Actions)
+
+A integridade do repositório é validada de forma automatizada a cada push e pull request através do workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+- **Gatilhos**: Disparado em `push` e `pull_request` nas branches principais (`main`, `master`, `after-time`) e via gatilho manual (`workflow_dispatch`).
+- **Otimização de Concorrência**: Utiliza `concurrency` com `cancel-in-progress: true` para pull requests, cancelando execuções redundantes de commits anteriores e economizando recursos.
+- **Ambiente Padronizado**: Node.js 22 LTS e pnpm 11 configurados conforme especificado no monorepo (`package.json`).
+- **Cache Duplo de Alta Performance**:
+  - Cache global da store do `pnpm` gerenciado nativamente pelo `actions/setup-node@v4`.
+  - Cache de compilação do Turborepo (`.turbo`) preservado via `actions/cache@v4` baseado no hash de `turbo.json` e `pnpm-lock.yaml`.
+- **Etapas Sequenciais da Esteira**:
+  1. `Checkout`: com `fetch-depth: 2`.
+  2. `Setup pnpm & Node.js 22`: com restauração de cache de dependências.
+  3. `Restore Turborepo Cache`: recuperação de artefatos cacheados.
+  4. `Install Dependencies`: `pnpm install --frozen-lockfile` determinístico.
+  5. `Generate Prisma Client`: `pnpm --filter @repo/backend db:generate`.
+  6. `Run Verification`: `pnpm verify` (lint + typecheck + testes unitários + testes e2e).
+  7. `Check Production Builds`: `pnpm build` (garantia de compilação de produção para Next.js e NestJS).
 
 ---
 
@@ -336,6 +356,7 @@ Além do mock determinístico calibrado para os 7 cenários, a aplicação inclu
 | **Validação e Filtros**             |  Núcleo   |    ✅ 100%    | `ValidationPipe` estrito e `HttpExceptionFilter` com injeção de `correlationId`.                         |
 | **Docker Compose**                  |  Núcleo   |    ✅ 100%    | Orquestra Postgres, Backend API e Frontend.                                                              |
 | **Testes Automatizados**            |  Núcleo   |    ✅ 100%    | 125+ testes unitários e e2e cobrindo caminhos felizes, bordas e timeout.                                 |
+| **Pipeline de CI/CD**               |  Núcleo   |    ✅ 100%    | Workflow `.github/workflows/ci.yml` com Node 22, pnpm 11, cache duplo (pnpm + turbo) e `pnpm verify`.    |
 | **Telas do Fluxo (4 etapas)**       |  Núcleo   |    ✅ 100%    | Iniciar, Motivo livre, Processamento real síncrono e Resultado.                                          |
 | **Agente de Classificação**         | _Stretch_ |    ✅ 100%    | Dicionário no banco (`reason_keywords`) rodando em paralelo via `Promise.all`.                           |
 | **Adapter LLM Real**                | _Stretch_ |    ✅ 100%    | `GeminiScoringAgent` com JSON mode e fallback automático.                                                |
